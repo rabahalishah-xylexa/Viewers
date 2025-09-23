@@ -1,6 +1,34 @@
 import React from 'react';
 
-const ICONS = {};
+import { ReactComponent as clipboard } from './../../assets/icons/clipboard.svg';
+import { ReactComponent as eyeVisible } from './../../assets/icons/eye-visible.svg';
+import { ReactComponent as eyeHidden } from './../../assets/icons/eye-hidden.svg';
+import { ReactComponent as logoXylexa } from './../../../../ui/src/assets/svgs/logo-full-white.svg';
+import { ReactComponent as saveIcon } from './../../assets/icons/save-icon.svg';
+import { ReactComponent as chevronLeft } from './../../assets/icons/chevron-left.svg';
+import { ReactComponent as dottedCircle } from './../../assets/icons/dotted-circle.svg';
+import { ReactComponent as writeReport } from './../../assets/icons/write-report.svg';
+import { ReactComponent as iconChevronPatient } from './../../assets/icons/icon-chevron-patient.svg';
+import { ReactComponent as iconPatient } from './../../assets/icons/icon-patient.svg';
+import { ReactComponent as chevronDown } from './../../assets/icons/chevron-down.svg';
+import { ReactComponent as uploadDicom } from './../../assets/icons/upload-dicom.svg';
+import { ReactComponent as chevronRight } from './../../assets/icons/chevron-right.svg';
+
+const ICONS = {
+  clipboard: clipboard,
+  'save-icon': saveIcon,
+  'eye-visible': eyeVisible,
+  'eye-hidden': eyeHidden,
+  'logo-xylexa': logoXylexa,
+  'dotted-circle': dottedCircle,
+  'write-report': writeReport,
+  'icon-chevron-patient': iconChevronPatient,
+  'icon-patient': iconPatient,
+  'chevron-left': chevronLeft,
+  'chevron-down': chevronDown,
+  'chevron-right': chevronRight,
+  'icon-upload-Dicom': uploadDicom,
+};
 function addIcon(iconName, iconSVG) {
   if (ICONS[iconName]) {
     console.warn(`Icon ${iconName} already exists.`);

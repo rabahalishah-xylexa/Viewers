@@ -9,6 +9,7 @@ import HeaderPatientInfo from './HeaderPatientInfo';
 import { PatientInfoVisibility } from './HeaderPatientInfo/HeaderPatientInfo';
 import { preserveQueryParameters } from '@ohif/app';
 import { Types } from '@ohif/core';
+import secureLocalStorage from 'react-secure-storage';
 
 function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }>) {
   const { servicesManager, extensionManager, commandsManager } = useSystem();
@@ -38,6 +39,8 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
 
   const { t } = useTranslation();
   const { show } = useModal();
+  const { measurementService } = servicesManager.services;
+  measurementService.annotationsDataArr = [];
 
   const AboutModal = customizationService.getCustomization(
     'ohif.aboutModal'
@@ -68,6 +71,14 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
           containerClassName:
             UserPreferencesModal?.containerClassName ?? 'flex max-w-4xl p-6 flex-col',
         }),
+    },
+    {
+      title: t('Header:Logout'),
+      icon: 'logout',
+      onClick: () => {
+        secureLocalStorage.clear();
+        window.location.href = window.location.origin;
+      },
     },
   ];
 

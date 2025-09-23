@@ -4,14 +4,13 @@ import PropTypes from 'prop-types';
 import { StudyItem } from '../StudyItem';
 import { StudyBrowserSort } from '../StudyBrowserSort';
 import { StudyBrowserViewOptions } from '../StudyBrowserViewOptions';
-import { ScrollArea } from '../ScrollArea';
+import { StudyBrowserSkeleton } from '@xylexa/xylexa-app';
 
 const noop = () => {};
 
 const StudyBrowser = ({
   tabs,
   activeTabName,
-  expandedStudyInstanceUIDs,
   onClickTab = noop,
   onClickStudy = noop,
   onClickThumbnail = noop,
@@ -31,58 +30,111 @@ const StudyBrowser = ({
       : 'thumbnails';
     return tabData?.studies?.map(
       ({ studyInstanceUid, date, description, numInstances, modalities, displaySets }) => {
-        const isExpanded = expandedStudyInstanceUIDs.includes(studyInstanceUid);
+        const isExpanded = true; //default behaviour
+        const displaySetsPerSeries = groupDisplaySetsPerSeries(displaySets);
         return (
           <React.Fragment key={studyInstanceUid}>
-            <StudyItem
-              date={date}
-              description={description}
-              numInstances={numInstances}
-              isExpanded={isExpanded}
-              displaySets={displaySets}
-              modalities={modalities}
-              isActive={isExpanded}
-              onClick={() => onClickStudy(studyInstanceUid)}
-              onClickThumbnail={onClickThumbnail}
-              onDoubleClickThumbnail={onDoubleClickThumbnail}
-              onClickUntrack={onClickUntrack}
-              activeDisplaySetInstanceUIDs={activeDisplaySetInstanceUIDs}
-              data-cy="thumbnail-list"
-              viewPreset={viewPreset}
-              ThumbnailMenuItems={ThumbnailMenuItems}
-              StudyMenuItems={StudyMenuItems}
-              StudyInstanceUID={studyInstanceUid}
-            />
+            {displaySetsPerSeries.map(displaySetPerSeries => {
+              const respectiveSeriesInstanceUID = displaySetPerSeries[0].parentSeriesInstanceUID;
+              return (
+                <StudyItem
+                  key={respectiveSeriesInstanceUID}
+                  date={date}
+                  description={description}
+                  numInstances={numInstances}
+                  isExpanded={isExpanded}
+                  displaySets={displaySetPerSeries}
+                  modalities={modalities}
+                  trackedSeries={getTrackedSeries(displaySets)}
+                  isActive={isExpanded}
+                  onClick={() => onClickStudy(respectiveSeriesInstanceUID)}
+                  onClickThumbnail={onClickThumbnail}
+                  onDoubleClickThumbnail={onDoubleClickThumbnail}
+                  onClickUntrack={onClickUntrack}
+                  activeDisplaySetInstanceUIDs={activeDisplaySetInstanceUIDs}
+                  data-cy="thumbnail-list"
+                  viewPreset={viewPreset}
+                  ThumbnailMenuItems={ThumbnailMenuItems}
+                  StudyMenuItems={StudyMenuItems}
+                  StudyInstanceUID={studyInstanceUid}
+                />
+              );
+            })}
           </React.Fragment>
         );
       }
     );
   };
 
+  const isLoading = getTabContent().length === 0;
+
   return (
-    <ScrollArea>
-      <div
-        className="bg-bkg-low flex flex-1 flex-col gap-[4px]"
-        data-cy={'studyBrowser-panel'}
-      >
-        <div className="flex flex-col gap-[4px]">
-          {showSettings && (
-            <div className="w-100 bg-bkg-low flex h-[48px] items-center justify-center gap-[10px] px-[8px] py-[10px]">
-              <>
-                <StudyBrowserViewOptions
-                  tabs={tabs}
-                  onSelectTab={onClickTab}
-                  activeTabName={activeTabName}
-                />
-                <StudyBrowserSort servicesManager={servicesManager} />
-              </>
-            </div>
-          )}
-          {getTabContent()}
+    <React.Fragment>
+      {showSettings && (
+        <div
+          className="w-100 bg-bkg-low flex h-[48px] items-center justify-center gap-[10px] px-[8px] py-[10px]"
+          data-cy={'studyBrowser-panel'}
+        >
+          <StudyBrowserViewOptions
+            tabs={tabs}
+            onSelectTab={onClickTab}
+            activeTabName={activeTabName}
+          />
+          <StudyBrowserSort servicesManager={servicesManager} />
         </div>
+      )}
+      <div className="ohif-scrollbar invisible-scrollbar bg-bkg-low flex flex-1 flex-col gap-[4px] overflow-auto">
+        {isLoading ? <StudyBrowserSkeleton /> : getTabContent()}
       </div>
-    </ScrollArea>
+    </React.Fragment>
   );
+};
+
+const getTrackedSeries = displaySets => {
+  let trackedSeries = 0;
+  displaySets.forEach(displaySet => {
+    if (displaySet.isTracked) {
+      trackedSeries++;
+    }
+  });
+
+  return trackedSeries;
+};
+
+function groupDisplaySetsPerSeries(allInstancesDisplaySets: DisplaySet[]): DisplaySet[][] {
+  return Object.values(
+    allInstancesDisplaySets.reduce((accumulator, obj) => {
+      return groupDisplaySetsHavingCommonSeries(accumulator, obj);
+    }, {})
+  );
+}
+
+function groupDisplaySetsHavingCommonSeries(accumulator, obj) {
+  accumulator[obj.parentSeriesInstanceUID] = accumulator[obj.parentSeriesInstanceUID] || [];
+  accumulator[obj.parentSeriesInstanceUID].push(obj);
+  return accumulator;
+}
+
+export type DragData = {
+  type: string;
+  displaySetInstanceUID: string;
+};
+
+export type DisplaySet = {
+  displaySetInstanceUID: string;
+  description: string;
+  seriesNumber: 11;
+  modality: string;
+  seriesDate: string;
+  numInstances: number;
+  messages: {
+    messages: [];
+  };
+  StudyInstanceUID: string;
+  componentType: string;
+  dragData: DragData;
+  isTracked: boolean;
+  parentSeriesInstanceUID: string;
 };
 
 StudyBrowser.propTypes = {
