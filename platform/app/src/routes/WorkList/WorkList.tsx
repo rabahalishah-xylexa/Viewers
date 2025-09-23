@@ -107,7 +107,7 @@ function WorkList({
     ...sessionQueryFilterValues,
   });
 
-  const { data: reportIds } = useGetReportIds();
+  const { data: reportIds } = useGetReportIds(); // ids of the reports that has been submitted
 
   useEffect(() => {
     measurementService.isChangeInViewPortAnnotationsDetected = false;
